@@ -1,0 +1,99 @@
+/* 引入书法字体 */
+@font-face {
+    font-family: 'Shufa';
+    src: url('fonts/书法.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Microsoft YaHei", "微软雅黑", sans-serif;
+    background-color: #fff;
+    color: #333;
+    line-height: 1.8;
+}
+
+.container {
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 40px 20px 60px;
+}
+
+/* 主标题 */
+.main-title {
+    font-family: 'Shufa', cursive;
+    font-size: 60px;
+    text-align: center;
+    color: #1a1a1a;
+    margin-bottom: 60px;
+    letter-spacing: 8px;
+    font-weight: normal;
+}
+
+/* HTML5 / CSS3 双栏 */
+.feature-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 40px;
+    margin-bottom: 70px;
+}
+
+.feature-item {
+    flex: 1;
+    text-align: center;
+}
+
+.feature-icon {
+    width: 90px;
+    height: auto;
+    margin-bottom: 25px;
+}
+
+.feature-text {
+    font-size: 16px;
+    color: #555;
+    text-align: left;
+    line-height: 2;
+    text-indent: 2em;
+}
+
+/* 平台支持标题 */
+.section-title {
+    font-size: 28px;
+    text-align: center;
+    color: #1a1a1a;
+    margin-bottom: 50px;
+    font-weight: bold;
+}
+
+/* 平台支持四栏 */
+.platform-row {
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-start;
+}
+
+.platform-item {
+    flex: 1;
+    text-align: center;
+    padding: 0 10px;
+}
+
+.platform-icon {
+    width: 70px;
+    height: 70px;
+    object-fit: contain;
+    margin-bottom: 18px;
+}
+
+.platform-name {
+    font-size: 16px;
+    color: #333;
+}
