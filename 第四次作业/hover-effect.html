@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图形 Hover 效果</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #1b1e2a;
+        }
+        .stage {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 56px;
+            padding: 56px 32px;
+        }
+        .cube {
+            position: relative;
+            width: 170px;
+            height: 170px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            /* 阴影默认向下偏移 10px，hover 时偏移量变为 0 */
+            transition: transform .35s ease, box-shadow .35s ease;
+        }
+        /* 形状中间的 hover 字样，默认隐藏 */
+        .cube::after {
+            content: "hover";
+            color: #ffffff;
+            font-size: 26px;
+            letter-spacing: 1px;
+            opacity: 0;
+            transition: opacity .35s ease;
+        }
+        /* 鼠标滑过：位置上移 10 像素，阴影偏移量变为 0，显示 hover 字样 */
+        .cube:hover {
+            transform: translateY(-10px);
+        }
+        .cube:hover::after {
+            opacity: 1;
+        }
+
+        /* 1. 橙红渐变直角方块 */
+        .c1 {
+            border-radius: 0;
+            background: linear-gradient(135deg, #ff9d5c, #ff5e62);
+            box-shadow: 0 10px 24px rgba(255, 94, 98, .35);
+        }
+        .c1:hover {
+            box-shadow: 0 0 24px rgba(255, 94, 98, .45);
+        }
+
+        /* 2. 翠绿小圆角方块 */
+        .c2 {
+            border-radius: 18px;
+            background: linear-gradient(135deg, #3ed9a0, #27c087);
+            box-shadow: 0 10px 24px rgba(46, 204, 153, .35);
+        }
+        .c2:hover {
+            box-shadow: 0 0 24px rgba(46, 204, 153, .45);
+        }
+
+        /* 3. 紫色大圆角方块 */
+        .c3 {
+            border-radius: 40px;
+            background: linear-gradient(135deg, #b48ead, #7b6ca3);
+            box-shadow: 0 10px 24px rgba(139, 110, 170, .4);
+        }
+        .c3:hover {
+            box-shadow: 0 0 24px rgba(139, 110, 170, .5);
+        }
+
+        /* 4. 橙黄渐变圆形 */
+        .c4 {
+            border-radius: 50%;
+            background: radial-gradient(circle at 38% 32%, #ffd271, #ffab5e);
+            box-shadow: 0 10px 30px rgba(255, 171, 94, .5);
+        }
+        .c4:hover {
+            box-shadow: 0 0 30px rgba(255, 171, 94, .6);
+        }
+
+        /* 5. 墨绿渐变直角方块 */
+        .c5 {
+            border-radius: 8px;
+            background: linear-gradient(135deg, #4a7d6d, #46677a);
+            box-shadow: 0 10px 24px rgba(74, 116, 122, .45);
+        }
+        .c5:hover {
+            box-shadow: 0 0 24px rgba(74, 116, 122, .55);
+        }
+
+        /* 6. 紫色 3D 质感圆球 */
+        .c6 {
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 30%, #d4b4de, #9a7cb8 55%, #7c6298);
+            box-shadow: 0 10px 28px rgba(154, 124, 184, .5);
+        }
+        .c6:hover {
+            box-shadow: 0 0 28px rgba(154, 124, 184, .6);
+        }
+    </style>
+</head>
+<body>
+    <div class="stage">
+        <div class="cube c1"></div>
+        <div class="cube c2"></div>
+        <div class="cube c3"></div>
+        <div class="cube c4"></div>
+        <div class="cube c5"></div>
+        <div class="cube c6"></div>
+    </div>
+</body>
+</html>
