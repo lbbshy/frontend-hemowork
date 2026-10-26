@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据看板</title>
+    <style>
+        /* ========== 颜色变量管理（深色为默认主题） ========== */
+        :root {
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --card-hover: #273449;
+            --text: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            --accent: #38bdf8;
+            --up: #34d399;
+            --down: #f87171;
+            --shadow: 0 10px 30px rgba(0, 0, 0, .35);
+        }
+
+        /* 浅色主题：通过 data-theme 切换 */
+        [data-theme="light"] {
+            --bg: #f1f5f9;
+            --card-bg: #ffffff;
+            --card-hover: #f8fafc;
+            --text: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --accent: #6366f1;
+            --up: #059669;
+            --down: #dc2626;
+            --shadow: 0 10px 30px rgba(15, 23, 42, .08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+                "Microsoft YaHei", sans-serif;
+            line-height: 1.6;
+            /* 防止 320px~1920px 出现横向滚动条 */
+            width: 100%;
+            overflow-x: hidden;
+            transition: background-color .3s ease, color .3s ease;
+        }
+
+        .page {
+            width: 100%;
+            max-width: 1400px;          /* 不写死 1200px，用 max-width + 自适应 */
+            margin: 0 auto;
+            padding: 32px 20px 64px;
+        }
+
+        /* ========== 头部 ========== */
+        .page-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 28px;
+        }
+
+        .page-header h1 {
+            font-size: clamp(1.5rem, 4vw, 2.25rem);
+            font-weight: 700;
+            letter-spacing: .5px;
+        }
+
+        .page-header .subtitle {
+            color: var(--text-muted);
+            font-size: .95rem;
+            margin-top: 4px;
+        }
+
+        .theme-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            background: var(--card-bg);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            font-size: .9rem;
+            cursor: pointer;
+            transition: background-color .2s ease, transform .2s ease, border-color .2s ease;
+        }
+
+        .theme-toggle:hover {
+            background: var(--card-hover);
+            transform: translateY(-1px);
+        }
+
+        .theme-toggle svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* ========== 卡片区块 ========== */
+        .cards-section h2 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--text-muted);
+        }
+
+        /* 卡片布局：grid auto-fit + minmax 作基础，断点处用媒体查询锁死列数 */
+        .cards {
+            display: grid;
+            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        }
+
+        /* 断点 1：<768 → 单列 */
+        @media (max-width: 767px) {
+            .cards {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* 断点 2：768 ~ 1199 → 两列 */
+        @media (min-width: 768px) and (max-width: 1199px) {
+            .cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* 断点 3：≥1200 → 四列 */
+        @media (min-width: 1200px) {
+            .cards {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        /* ========== 单张卡片 ========== */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 22px;
+            box-shadow: var(--shadow);
+            transition: transform .25s ease, box-shadow .25s ease, background-color .25s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            background: var(--card-hover);
+        }
+
+        .card-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-icon {
+            width: 44px;
+            height: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            background: color-mix(in srgb, var(--accent) 15%, transparent);
+            color: var(--accent);
+        }
+
+        .card-icon svg {
+            width: 24px;
+            height: 24px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .card-trend {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: .8rem;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 999px;
+        }
+
+        .card-trend svg {
+            width: 14px;
+            height: 14px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .card-trend.up {
+            color: var(--up);
+            background: color-mix(in srgb, var(--up) 15%, transparent);
+        }
+
+        .card-trend.down {
+            color: var(--down);
+            background: color-mix(in srgb, var(--down) 15%, transparent);
+        }
+
+        .card-title {
+            font-size: .9rem;
+            color: var(--text-muted);
+        }
+
+        .card-value {
+            font-size: clamp(1.6rem, 4vw, 2rem);
+            font-weight: 700;
+            /* 等宽数字，切换时不抖动 */
+            font-variant-numeric: tabular-nums;
+            letter-spacing: .5px;
+        }
+
+        .card-value .unit {
+            font-size: .6em;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-left: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <!-- 头部：h1 标题 + 主题切换 button -->
+        <header class="page-header">
+            <div>
+                <h1>数据看板</h1>
+                <p class="subtitle">实时业务核心指标概览</p>
+            </div>
+            <button class="theme-toggle" id="themeToggle" type="button" aria-label="切换深色/浅色主题">
+                <!-- 内联 SVG 图标，使用 currentColor -->
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="12" cy="12" r="4"></circle>
+                    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>
+                </svg>
+                <span>切换主题</span>
+            </button>
+        </header>
+
+        <!-- 卡片区：语义化 section + h2 -->
+        <section class="cards-section" aria-label="核心指标">
+            <h2>核心指标</h2>
+            <div class="cards" id="cards"></div>
+        </section>
+    </div>
+
+    <script>
+        // ========== 6 条数据由 JS 数组渲染，不手写重复 HTML ==========
+        const stats = [
+            {
+                title: "总销售额",
+                value: 128450,
+                unit: "元",
+                trend: 12.5,
+                up: true,
+                accent: "#38bdf8",
+                icon: '<svg viewBox="0 0 24 24"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>'
+            },
+            {
+                title: "订单总数",
+                value: 1284,
+                unit: "单",
+                trend: 8.2,
+                up: true,
+                accent: "#a78bfa",
+                icon: '<svg viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>'
+            },
+            {
+                title: "新增用户",
+                value: 3672,
+                unit: "人",
+                trend: 5.4,
+                up: true,
+                accent: "#34d399",
+                icon: '<svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>'
+            },
+            {
+                title: "转化率",
+                value: 4.8,
+                unit: "%",
+                trend: 1.2,
+                up: false,
+                accent: "#fbbf24",
+                icon: '<svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>'
+            },
+            {
+                title: "客单价",
+                value: 268,
+                unit: "元",
+                trend: 3.1,
+                up: true,
+                accent: "#f472b6",
+                icon: '<svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>'
+            },
+            {
+                title: "满意度",
+                value: 96,
+                unit: "%",
+                trend: 2.0,
+                up: true,
+                accent: "#22d3ee",
+                icon: '<svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>'
+            }
+        ];
+
+        const cardsContainer = document.getElementById("cards");
+
+        // 数字千分位格式化
+        function formatNumber(num) {
+            return num.toLocaleString("en-US");
+        }
+
+        // 渲染全部卡片
+        function renderCards() {
+            cardsContainer.innerHTML = stats.map(item => `
+                <article class="card">
+                    <div class="card-head">
+                        <span class="card-icon" style="--accent: ${item.accent}">${item.icon}</span>
+                        <span class="card-trend ${item.up ? "up" : "down"}">
+                            <svg viewBox="0 0 24 24">
+                                ${item.up
+                                    ? '<path d="M18 15l-6-6-6 6"/>'
+                                    : '<path d="M6 9l6 6 6-6"/>'}
+                            </svg>
+                            ${item.trend}%
+                        </span>
+                    </div>
+                    <div class="card-title">${item.title}</div>
+                    <div class="card-value">
+                        ${formatNumber(item.value)}<span class="unit">${item.unit}</span>
+                    </div>
+                </article>
+            `).join("");
+        }
+
+        renderCards();
+
+        // ========== 深色 / 浅色主题切换 ==========
+        const themeToggle = document.getElementById("themeToggle");
+        const savedTheme = localStorage.getItem("dashboard-theme");
+
+        // 初始化主题
+        if (savedTheme) {
+            document.documentElement.setAttribute("data-theme", savedTheme);
+        }
+
+        themeToggle.addEventListener("click", () => {
+            const current = document.documentElement.getAttribute("data-theme");
+            const next = current === "light" ? "dark" : "light";
+            document.documentElement.setAttribute("data-theme", next);
+            localStorage.setItem("dashboard-theme", next);
+        });
+    </script>
+</body>
+</html>
