@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>注册 - AI助教答疑平台</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+            background: linear-gradient(135deg, #eef4ff 0%, #f5f7fa 50%, #eef4ff 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 30px 16px;
+        }
+        .card {
+            width: 100%;
+            max-width: 520px;
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(59, 130, 246, .12);
+            padding: 40px 36px;
+        }
+        .brand { text-align: center; margin-bottom: 28px; }
+        .brand h1 {
+            font-size: 1.5rem;
+            color: #1e293b;
+            margin-bottom: 6px;
+        }
+        .brand p { color: #64748b; font-size: .9rem; }
+        .form-row { display: grid; gap: 16px; margin-bottom: 16px; }
+        .form-row.two { grid-template-columns: 1fr 1fr; }
+        @media (max-width: 480px) { .form-row.two { grid-template-columns: 1fr; } }
+        .field { display: flex; flex-direction: column; gap: 6px; }
+        .field label { font-size: .85rem; color: #334155; font-weight: 600; }
+        .field label .req { color: #ef4444; }
+        .field input, .field select {
+            height: 42px;
+            padding: 0 14px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: .92rem;
+            color: #0f172a;
+            background: #f8fafc;
+            transition: border-color .2s, box-shadow .2s, background .2s;
+            outline: none;
+        }
+        .field input:focus, .field select:focus {
+            border-color: #3b82f6;
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, .12);
+        }
+        /* HTML5 校验伪类 */
+        .field input:valid:not(:placeholder-shown) {
+            border-color: #22c55e;
+        }
+        .field input.invalid {
+            border-color: #ef4444;
+            background: #fef2f2;
+        }
+        .field .hint { font-size: .75rem; color: #94a3b8; }
+        .field .error { font-size: .78rem; color: #ef4444; min-height: 1em; }
+        .avatar-group { display: flex; gap: 12px; flex-wrap: wrap; }
+        .avatar-option {
+            position: relative;
+            cursor: pointer;
+        }
+        .avatar-option input { position: absolute; opacity: 0; }
+        .avatar-box {
+            width: 52px; height: 52px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.4rem;
+            border: 2.5px solid #e2e8f0;
+            background: #f8fafc;
+            transition: all .2s;
+        }
+        .avatar-option input:checked + .avatar-box {
+            border-color: #3b82f6;
+            background: #eff6ff;
+            transform: scale(1.08);
+        }
+        .check-row { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 16px; }
+        .check-row input { margin-top: 3px; accent-color: #3b82f6; }
+        .check-row label { font-size: .85rem; color: #475569; cursor: pointer; }
+        .check-row label a { color: #3b82f6; text-decoration: none; }
+        .btn {
+            width: 100%;
+            height: 46px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform .15s, box-shadow .2s;
+        }
+        .btn:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(59,130,246,.3); }
+        .btn:active { transform: translateY(0); }
+        .btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+        .foot { text-align: center; margin-top: 18px; font-size: .88rem; color: #64748b; }
+        .foot a { color: #3b82f6; text-decoration: none; font-weight: 600; }
+        .toast {
+            position: fixed; top: 24px; left: 50%; transform: translateX(-50%) translateY(-80px);
+            background: #1e293b; color: #fff; padding: 12px 24px; border-radius: 10px;
+            font-size: .9rem; opacity: 0; transition: all .3s ease; z-index: 99;
+        }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="brand">
+            <h1>🤖 AI助教答疑平台</h1>
+            <p>智能答疑 · 随时提问</p>
+        </div>
+
+        <!-- novalidate：禁用浏览器默认气泡提示，改用自定义校验信息 -->
+        <form id="registerForm" novalidate>
+            <div class="form-row">
+                <div class="field">
+                    <label>用户名 <span class="req">*</span></label>
+                    <input type="text" name="username" id="username"
+                        placeholder="3-20 位字母、数字或下划线"
+                        required minlength="3" maxlength="20"
+                        pattern="^[A-Za-z0-9_]{3,20}$"
+                        autocomplete="username">
+                    <span class="error" data-for="username"></span>
+                </div>
+            </div>
+
+            <div class="form-row two">
+                <div class="field">
+                    <label>邮箱 <span class="req">*</span></label>
+                    <input type="email" name="email" id="email"
+                        placeholder="example@school.edu"
+                        required autocomplete="email">
+                    <span class="error" data-for="email"></span>
+                </div>
+                <div class="field">
+                    <label>手机号 <span class="req">*</span></label>
+                    <input type="tel" name="phone" id="phone"
+                        placeholder="请输入 11 位手机号"
+                        required pattern="^1[3-9]\d{9}$"
+                        maxlength="11" inputmode="numeric"
+                        autocomplete="tel">
+                    <span class="error" data-for="phone"></span>
+                </div>
+            </div>
+
+            <div class="form-row two">
+                <div class="field">
+                    <label>学号 <span class="req">*</span></label>
+                    <input type="text" name="studentId" id="studentId"
+                        placeholder="请输入学号"
+                        required pattern="^\d{8,12}$"
+                        inputmode="numeric">
+                    <span class="error" data-for="studentId"></span>
+                </div>
+                <div class="field">
+                    <label>所在院系</label>
+                    <!-- datalist 提供输入建议，同时允许自由输入 -->
+                    <input type="text" name="department" id="department"
+                        placeholder="选择或输入院系"
+                        list="deptList" autocomplete="organization">
+                    <datalist id="deptList">
+                        <option value="计算机学院"></option>
+                        <option value="软件学院"></option>
+                        <option value="电子信息学院"></option>
+                        <option value="数学与统计学院"></option>
+                        <option value="外国语学院"></option>
+                        <option value="经济管理学院"></option>
+                    </datalist>
+                </div>
+            </div>
+
+            <div class="form-row two">
+                <div class="field">
+                    <label>密码 <span class="req">*</span></label>
+                    <input type="password" name="password" id="password"
+                        placeholder="至少 6 位，含字母和数字"
+                        required minlength="6"
+                        pattern="^(?=.*[A-Za-z])(?=.*\d).{6,}$"
+                        autocomplete="new-password">
+                    <span class="error" data-for="password"></span>
+                </div>
+                <div class="field">
+                    <label>确认密码 <span class="req">*</span></label>
+                    <input type="password" name="confirm" id="confirm"
+                        placeholder="再次输入密码"
+                        required autocomplete="new-password">
+                    <span class="error" data-for="confirm"></span>
+                </div>
+            </div>
+
+            <div class="field" style="margin-bottom:16px;">
+                <label>选择头像</label>
+                <div class="avatar-group" id="avatarGroup">
+                    <label class="avatar-option">
+                        <input type="radio" name="avatar" value="🦊" checked>
+                        <span class="avatar-box">🦊</span>
+                    </label>
+                    <label class="avatar-option">
+                        <input type="radio" name="avatar" value="🐼">
+                        <span class="avatar-box">🐼</span>
+                    </label>
+                    <label class="avatar-option">
+                        <input type="radio" name="avatar" value="🦉">
+                        <span class="avatar-box">🦉</span>
+                    </label>
+                    <label class="avatar-option">
+                        <input type="radio" name="avatar" value="🐱">
+                        <span class="avatar-box">🐱</span>
+                    </label>
+                    <label class="avatar-option">
+                        <input type="radio" name="avatar" value="🐯">
+                        <span class="avatar-box">🐯</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="check-row">
+                <input type="checkbox" name="agree" id="agree" required>
+                <label for="agree">我已阅读并同意 <a href="#">《用户协议》</a> 和 <a href="#">《隐私政策》</a></label>
+            </div>
+            <span class="error" data-for="agree" style="display:block;margin:-8px 0 12px;font-size:.78rem;color:#ef4444;min-height:1em;"></span>
+
+            <button type="submit" class="btn" id="submitBtn">注 册</button>
+        </form>
+
+        <div class="foot">已有账号？<a href="login.html">立即登录</a></div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        const form = document.getElementById('registerForm');
+        const fields = ['username', 'email', 'phone', 'studentId', 'password', 'confirm'];
+        const errorMap = {
+            username: '用户名需为 3-20 位字母、数字或下划线',
+            email: '请输入有效的邮箱地址',
+            phone: '请输入正确的 11 位手机号',
+            studentId: '学号需为 8-12 位数字',
+            password: '密码至少 6 位，需同时包含字母和数字',
+            confirm: '两次输入的密码不一致',
+            agree: '请先阅读并同意用户协议'
+        };
+
+        function setError(name, msg) {
+            const el = document.querySelector(`.error[data-for="${name}"]`);
+            const input = document.getElementById(name);
+            if (el) el.textContent = msg || '';
+            if (input) input.classList.toggle('invalid', !!msg);
+        }
+
+        // 实时校验：input 事件
+        fields.forEach(name => {
+            const input = document.getElementById(name);
+            input.addEventListener('input', () => validateField(name));
+            input.addEventListener('blur', () => validateField(name));
+        });
+
+        function validateField(name) {
+            const input = document.getElementById(name);
+            // 用 checkValidity 触发原生约束校验
+            if (!input.checkValidity()) {
+                setError(name, errorMap[name]);
+                return false;
+            }
+            // 确认密码一致性自定义校验
+            if (name === 'confirm') {
+                if (input.value !== document.getElementById('password').value) {
+                    setError(name, errorMap.confirm);
+                    input.setCustomValidity(errorMap.confirm);
+                    return false;
+                } else {
+                    input.setCustomValidity('');
+                }
+            }
+            if (name === 'password') {
+                const c = document.getElementById('confirm');
+                if (c.value) validateField('confirm');
+            }
+            setError(name, '');
+            return true;
+        }
+
+        // 协议勾选校验
+        document.getElementById('agree').addEventListener('change', e => {
+            setError('agree', e.target.checked ? '' : errorMap.agree);
+        });
+
+        form.addEventListener('submit', e => {
+            e.preventDefault();
+            let ok = true;
+            fields.forEach(n => { if (!validateField(n)) ok = false; });
+            const agree = document.getElementById('agree');
+            if (!agree.checked) { setError('agree', errorMap.agree); ok = false; }
+
+            if (!ok) {
+                showToast('请检查表单填写是否正确');
+                return;
+            }
+            // 提交成功模拟
+            const data = Object.fromEntries(new FormData(form).entries());
+            console.log('注册数据：', data);
+            showToast('🎉 注册成功！正在跳转登录页...');
+            setTimeout(() => { location.href = 'login.html'; }, 1400);
+        });
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            clearTimeout(showToast._t);
+            showToast._t = setTimeout(() => t.classList.remove('show'), 2000);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录 - AI助教答疑平台</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+            background: linear-gradient(135deg, #eef4ff 0%, #f5f7fa 50%, #eef4ff 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 30px 16px;
+        }
+        .card {
+            width: 100%;
+            max-width: 420px;
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(59, 130, 246, .12);
+            padding: 40px 36px;
+        }
+        .brand { text-align: center; margin-bottom: 28px; }
+        .brand .logo { font-size: 2.5rem; margin-bottom: 8px; }
+        .brand h1 { font-size: 1.5rem; color: #1e293b; margin-bottom: 6px; }
+        .brand p { color: #64748b; font-size: .9rem; }
+
+        .tab-bar {
+            display: flex;
+            background: #f1f5f9;
+            border-radius: 10px;
+            padding: 4px;
+            margin-bottom: 24px;
+        }
+        .tab-bar button {
+            flex: 1;
+            border: none;
+            background: transparent;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: .9rem;
+            color: #64748b;
+            font-weight: 500;
+            transition: all .2s;
+        }
+        .tab-bar button.active {
+            background: #fff;
+            color: #2563eb;
+            box-shadow: 0 2px 8px rgba(0,0,0,.06);
+        }
+
+        .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+        .field label { font-size: .85rem; color: #334155; font-weight: 600; }
+        .field label .req { color: #ef4444; }
+        .field input {
+            height: 44px;
+            padding: 0 14px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: .92rem;
+            color: #0f172a;
+            background: #f8fafc;
+            transition: border-color .2s, box-shadow .2s, background .2s;
+            outline: none;
+        }
+        .field input:focus {
+            border-color: #3b82f6;
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, .12);
+        }
+        .field input:valid:not(:placeholder-shown) { border-color: #22c55e; }
+        .field input.invalid { border-color: #ef4444; background: #fef2f2; }
+        .field .error { font-size: .78rem; color: #ef4444; min-height: 1em; }
+
+        .pwd-wrap { position: relative; }
+        .pwd-wrap input { padding-right: 46px; }
+        .toggle-pwd {
+            position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+            background: none; border: none; cursor: pointer; font-size: 1.1rem;
+            color: #94a3b8; padding: 4px;
+        }
+
+        .opt-row {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 20px; font-size: .85rem;
+        }
+        .opt-row label { display: flex; align-items: center; gap: 6px; color: #475569; cursor: pointer; }
+        .opt-row input { accent-color: #3b82f6; }
+        .opt-row a { color: #3b82f6; text-decoration: none; }
+
+        .btn {
+            width: 100%; height: 46px; border: none; border-radius: 10px;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: #fff; font-size: 1rem; font-weight: 600; cursor: pointer;
+            transition: transform .15s, box-shadow .2s;
+        }
+        .btn:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(59,130,246,.3); }
+        .btn:active { transform: translateY(0); }
+
+        .divider {
+            display: flex; align-items: center; gap: 12px; margin: 22px 0;
+            color: #94a3b8; font-size: .8rem;
+        }
+        .divider::before, .divider::after {
+            content: ''; flex: 1; height: 1px; background: #e2e8f0;
+        }
+        .social-row { display: flex; gap: 12px; justify-content: center; }
+        .social-btn {
+            width: 44px; height: 44px; border-radius: 50%; border: 1.5px solid #e2e8f0;
+            background: #fff; cursor: pointer; font-size: 1.2rem;
+            display: flex; align-items: center; justify-content: center;
+            transition: all .2s;
+        }
+        .social-btn:hover { border-color: #3b82f6; background: #eff6ff; }
+
+        .foot { text-align: center; margin-top: 22px; font-size: .88rem; color: #64748b; }
+        .foot a { color: #3b82f6; text-decoration: none; font-weight: 600; }
+
+        .toast {
+            position: fixed; top: 24px; left: 50%; transform: translateX(-50%) translateY(-80px);
+            background: #1e293b; color: #fff; padding: 12px 24px; border-radius: 10px;
+            font-size: .9rem; opacity: 0; transition: all .3s ease; z-index: 99;
+        }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="brand">
+            <div class="logo">🤖</div>
+            <h1>AI助教答疑平台</h1>
+            <p>智能答疑 · 随时提问</p>
+        </div>
+
+        <!-- 登录方式切换：账号密码 / 手机号验证码 -->
+        <div class="tab-bar">
+            <button type="button" class="active" data-tab="account">账号密码</button>
+            <button type="button" data-tab="sms">短信验证码</button>
+        </div>
+
+        <form id="loginForm" novalidate>
+            <!-- 账号密码登录 -->
+            <div class="tab-panel" data-panel="account">
+                <div class="field">
+                    <label>用户名 / 邮箱 <span class="req">*</span></label>
+                    <input type="text" name="account" id="account"
+                        placeholder="请输入用户名或邮箱"
+                        required autocomplete="username">
+                    <span class="error" data-for="account"></span>
+                </div>
+                <div class="field">
+                    <label>密码 <span class="req">*</span></label>
+                    <div class="pwd-wrap">
+                        <input type="password" name="password" id="password"
+                            placeholder="请输入密码"
+                            required minlength="6" autocomplete="current-password">
+                        <button type="button" class="toggle-pwd" id="togglePwd" aria-label="显示/隐藏密码">👁️</button>
+                    </div>
+                    <span class="error" data-for="password"></span>
+                </div>
+            </div>
+
+            <!-- 短信验证码登录 -->
+            <div class="tab-panel" data-panel="sms" style="display:none;">
+                <div class="field">
+                    <label>手机号 <span class="req">*</span></label>
+                    <input type="tel" name="phone" id="phone"
+                        placeholder="请输入 11 位手机号"
+                        required pattern="^1[3-9]\d{9}$"
+                        maxlength="11" inputmode="numeric"
+                        autocomplete="tel">
+                    <span class="error" data-for="phone"></span>
+                </div>
+                <div class="field">
+                    <label>验证码 <span class="req">*</span></label>
+                    <div style="display:flex;gap:10px;">
+                        <input type="text" name="code" id="code"
+                            placeholder="6 位验证码"
+                            required pattern="^\d{6}$"
+                            maxlength="6" inputmode="numeric"
+                            style="flex:1;">
+                        <button type="button" id="sendCode" style="padding:0 16px;border-radius:10px;border:1.5px solid #3b82f6;background:#eff6ff;color:#2563eb;font-weight:600;cursor:pointer;white-space:nowrap;">获取验证码</button>
+                    </div>
+                    <span class="error" data-for="code"></span>
+                </div>
+            </div>
+
+            <div class="opt-row">
+                <label><input type="checkbox" name="remember" id="remember"> 记住我</label>
+                <a href="#">忘记密码？</a>
+            </div>
+
+            <button type="submit" class="btn">登 录</button>
+        </form>
+
+        <div class="divider">其他登录方式</div>
+        <div class="social-row">
+            <button type="button" class="social-btn" title="微信登录">💬</button>
+            <button type="button" class="social-btn" title="QQ 登录">🐧</button>
+            <button type="button" class="social-btn" title="GitHub 登录">🐙</button>
+        </div>
+
+        <div class="foot">还没有账号？<a href="register.html">立即注册</a></div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        const form = document.getElementById('loginForm');
+        const tabs = document.querySelectorAll('.tab-bar button');
+        const panels = document.querySelectorAll('.tab-panel');
+        let currentTab = 'account';
+
+        // Tab 切换
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                currentTab = tab.dataset.tab;
+                panels.forEach(p => {
+                    p.style.display = p.dataset.panel === currentTab ? '' : 'none';
+                });
+            });
+        });
+
+        // 密码显示/隐藏
+        const togglePwd = document.getElementById('togglePwd');
+        const pwdInput = document.getElementById('password');
+        togglePwd.addEventListener('click', () => {
+            const isPwd = pwdInput.type === 'password';
+            pwdInput.type = isPwd ? 'text' : 'password';
+            togglePwd.textContent = isPwd ? '🙈' : '👁️';
+        });
+
+        // 验证码倒计时
+        const sendCodeBtn = document.getElementById('sendCode');
+        const phoneInput = document.getElementById('phone');
+        sendCodeBtn.addEventListener('click', () => {
+            if (!phoneInput.checkValidity()) {
+                setError('phone', '请输入正确的 11 位手机号');
+                phoneInput.classList.add('invalid');
+                return;
+            }
+            let count = 60;
+            sendCodeBtn.disabled = true;
+            sendCodeBtn.textContent = `${count}s 后重发`;
+            const timer = setInterval(() => {
+                count--;
+                if (count <= 0) {
+                    clearInterval(timer);
+                    sendCodeBtn.disabled = false;
+                    sendCodeBtn.textContent = '获取验证码';
+                } else {
+                    sendCodeBtn.textContent = `${count}s 后重发`;
+                }
+            }, 1000);
+            showToast('验证码已发送（测试：123456）');
+        });
+
+        function setError(name, msg) {
+            const el = document.querySelector(`.error[data-for="${name}"]`);
+            const input = document.getElementById(name);
+            if (el) el.textContent = msg || '';
+            if (input) input.classList.toggle('invalid', !!msg);
+        }
+
+        // 实时校验
+        ['account', 'password', 'phone', 'code'].forEach(name => {
+            const input = document.getElementById(name);
+            if (!input) return;
+            input.addEventListener('input', () => {
+                if (input.checkValidity()) setError(name, '');
+            });
+            input.addEventListener('blur', () => {
+                if (!input.checkValidity()) {
+                    const msgs = {
+                        account: '请输入用户名或邮箱',
+                        password: '密码至少 6 位',
+                        phone: '请输入正确的 11 位手机号',
+                        code: '请输入 6 位数字验证码'
+                    };
+                    setError(name, msgs[name]);
+                }
+            });
+        });
+
+        form.addEventListener('submit', e => {
+            e.preventDefault();
+            let ok = true;
+            if (currentTab === 'account') {
+                ['account', 'password'].forEach(n => {
+                    const inp = document.getElementById(n);
+                    if (!inp.checkValidity()) {
+                        const msgs = { account: '请输入用户名或邮箱', password: '密码至少 6 位' };
+                        setError(n, msgs[n]);
+                        ok = false;
+                    }
+                });
+            } else {
+                ['phone', 'code'].forEach(n => {
+                    const inp = document.getElementById(n);
+                    if (!inp.checkValidity()) {
+                        const msgs = { phone: '请输入正确的手机号', code: '请输入 6 位验证码' };
+                        setError(n, msgs[n]);
+                        ok = false;
+                    }
+                });
+            }
+            if (!ok) { showToast('请检查表单填写'); return; }
+
+            const data = Object.fromEntries(new FormData(form).entries());
+            data.loginType = currentTab;
+            console.log('登录数据：', data);
+            showToast('✅ 登录成功！正在进入答疑平台...');
+            setTimeout(() => { location.href = 'index.html'; }, 1400);
+        });
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            clearTimeout(showToast._t);
+            showToast._t = setTimeout(() => t.classList.remove('show'), 2000);
+        }
+    </script>
+</body>
+</html>
